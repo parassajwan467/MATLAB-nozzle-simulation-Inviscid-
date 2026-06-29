@@ -11,9 +11,9 @@ T0 = 555;
 
 gamma = 1.4;
 
-CFL = 0.05;%try 0.01
+CFL = 0.05;
 
-MaxIter = 500;
+MaxIter = 2000;
 
 ResidualTolerance = 1e-8;
 
@@ -74,13 +74,13 @@ for iter = 1:MaxIter
     % Time Step
     %% --------------------------------------------------------
 
-    dt = ComputeTimeStep(mesh,prim,CFL);
+    [dt,dtLocal] = ComputeTimeStep(mesh,prim,CFL);
 
     %% --------------------------------------------------------
     % RK3 Update
     %% --------------------------------------------------------
 
-    W = RK3Step(mesh,W,dt);
+    W = RK3Step(mesh,W,dt,dtLocal);
 
     %% --------------------------------------------------------
     % Updated Primitive Variables
@@ -108,7 +108,7 @@ for iter = 1:MaxIter
     % Residual Evaluation
     %% --------------------------------------------------------
 
-    R = BuildResidual(mesh,W);
+    R = BuildResidual(mesh,W,dtLocal);
 
     ResidualHistory(iter) = max(abs(R(:)));
 
