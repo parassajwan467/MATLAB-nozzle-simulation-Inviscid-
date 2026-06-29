@@ -1,19 +1,32 @@
-function dt = ComputeTimeStep(mesh,prim,CFL)
+function [dtGlobal,dtLocal] = ComputeTimeStep(mesh,prim,CFL)
 
 %% ============================================================
 % COMPUTETIMESTEP
 %
-% Computes global timestep using CFL condition
+% Computes local and global CFL time steps.
 %
-% dt = CFL * min(dx/(|u|+a), dr/(|v|+a))
+% OUTPUT:
+%
+% dtLocal(i,j) : Local cell time step
+%
+% dtGlobal     : Minimum time step in domain
 %
 %% ============================================================
 
-dt = 1e20;
+nxc = mesh.nxc;
+nrc = mesh.nrc;
 
-for i = 1:mesh.nxc
+dtLocal = zeros(nxc,nrc);
 
-    for j = 1:mesh.nrc
+dtGlobal = 1e20;
+
+for i = 1:nxc
+
+    for j = 1:nrc
+
+        %% ----------------------------------------------------
+        % Local grid spacing
+        %% ----------------------------------------------------
 
         dx_local = mesh.dx;
 
@@ -21,13 +34,26 @@ for i = 1:mesh.nxc
             mesh.dr(i,j) + ...
             mesh.dr(i+1,j));
 
+        %% ----------------------------------------------------
+        % Spectral radii
+        %% ----------------------------------------------------
+
         lambda_x = abs(prim.u(i,j)) + prim.a(i,j);
 
         lambda_r = abs(prim.v(i,j)) + prim.a(i,j);
 
-        dt_cell = CFL / (lambda_x/dx_local + lambda_r/dr_local );
+        %% ----------------------------------------------------
+        % Local time step
+        %% ----------------------------------------------------
 
-        dt = min(dt,dt_cell);
+        dtLocal(i,j) = CFL / ...
+            (lambda_x/dx_local + lambda_r/dr_local);
+
+        %% ----------------------------------------------------
+        % Global time step
+        %% ----------------------------------------------------
+
+        dtGlobal = min(dtGlobal,dtLocal(i,j));
 
     end
 
