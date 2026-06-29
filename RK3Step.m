@@ -1,4 +1,4 @@
-function Wnew = RK3Step(mesh,W,dt)
+function Wnew = RK3Step(mesh,W,dt,dtlocal)
 
 %% ============================================================
 % TVD RK3
@@ -8,7 +8,7 @@ function Wnew = RK3Step(mesh,W,dt)
 % Stage 1
 %% ------------------------------------------------------------
 
-R1 = BuildResidual(mesh,W);
+R1 = BuildResidual(mesh,W,dtlocal);
 
 W1 = W + dt*R1;
 
@@ -18,7 +18,7 @@ W1 = ApplyBoundaryConditions(mesh,W1);
 % Stage 2
 %% ------------------------------------------------------------
 
-R2 = BuildResidual(mesh,W1);
+R2 = BuildResidual(mesh,W1,dtlocal);
 
 W2 = (3/4)*W + ...
      (1/4)*(W1 + dt*R2);
@@ -29,7 +29,7 @@ W2 = ApplyBoundaryConditions(mesh,W2);
 % Stage 3
 %% ------------------------------------------------------------
 
-R3 = BuildResidual(mesh,W2);
+R3 = BuildResidual(mesh,W2,dtlocal);
 
 Wnew = (1/3)*W + ...
        (2/3)*(W2 + dt*R3);
